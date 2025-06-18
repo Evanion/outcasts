@@ -3,12 +3,17 @@ import {
   getMetaTagTransformer,
   wrapSentryHandleRequest,
 } from "@sentry/react-router";
-import type { AppLoadContext, EntryContext } from "react-router";
+import type {
+  EntryContext,
+  unstable_RouterContextProvider,
+} from "react-router";
 import { createReadableStreamFromReadable } from "@react-router/node";
 import { ServerRouter } from "react-router";
 import { isbot } from "isbot";
 import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
+import { I18nextProvider } from "react-i18next";
+import { getInstance } from "./modules/i18n";
 
 export const streamTimeout = 5_000;
 
@@ -16,8 +21,8 @@ function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  routerContext: EntryContext,
-  loadContext: AppLoadContext
+  entryContext: EntryContext,
+  routerContext: unstable_RouterContextProvider
   // If you have middleware enabled:
   // loadContext: unstable_RouterContextProvider
 ) {
@@ -28,12 +33,14 @@ function handleRequest(
     // Ensure requests from bots and SPA Mode renders wait for all content to load before responding
     // https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
     let readyOption: keyof RenderToPipeableStreamOptions =
-      (userAgent && isbot(userAgent)) || routerContext.isSpaMode
+      (userAgent && isbot(userAgent)) || entryContext.isSpaMode
         ? "onAllReady"
         : "onShellReady";
 
     const { pipe, abort } = renderToPipeableStream(
-      <ServerRouter context={routerContext} url={request.url} />,
+      <I18nextProvider i18n={getInstance(routerContext)}>
+        <ServerRouter context={entryContext} url={request.url} />
+      </I18nextProvider>,
       {
         [readyOption]() {
           shellRendered = true;
@@ -72,4 +79,4 @@ function handleRequest(
   });
 }
 
-export default wrapSentryHandleRequest(handleRequest);
+export default wrapSentryHandleRequest(handleRequest as any);

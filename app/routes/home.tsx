@@ -4,13 +4,19 @@ import { Button } from "~/components/ui/button";
 import { Form, Link } from "react-router";
 import { SocialButton } from "~/modules/auth/components/social-button";
 import { Provider } from "~/modules/auth/enums/provider.enum";
+import { getInstance } from "~/modules/i18n/i18n.middleware";
+import { useTranslation } from "react-i18next";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const session = await sessionStorage.getSession(
     request.headers.get("Cookie")
   );
 
-  return { user: session.get("user") || null };
+  const user = session.get("user");
+
+  return {
+    user,
+  };
 };
 
 export function meta({}: Route.MetaArgs) {
@@ -20,8 +26,9 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
-  if (!loaderData.user)
+export default function Home({ loaderData: { user } }: Route.ComponentProps) {
+  const { t } = useTranslation("auth");
+  if (!user)
     return (
       <div className="flex h-screen items-center justify-center">
         <Form method="post" action="/login">
@@ -33,9 +40,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <div className="flex h-screen items-center justify-center">
       <h1>
-        Welcome {loaderData.user.battletag}{" "}
+        {t("GREETING_USER", { username: user.battletag, ns: "auth" })}
         <Button asChild>
-          <Link to="/logout">Logout</Link>
+          <Link to="/logout">{t("LOGOUT", { ns: "auth" })}</Link>
         </Button>
       </h1>
     </div>
