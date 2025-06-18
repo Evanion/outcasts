@@ -1,4 +1,5 @@
 import { reactRouter } from "@react-router/dev/vite";
+import devtoolsJson from "vite-plugin-devtools-json";
 import tailwindcss from "@tailwindcss/vite";
 import {
   sentryReactRouter,
@@ -17,9 +18,13 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 
 export default defineConfig((config) => ({
   plugins: [
+    devtoolsJson(),
     tailwindcss(),
     reactRouter(),
     sentryReactRouter(sentryConfig, config),
     tsconfigPaths(),
   ],
+  server: {
+    port: 3000,
+  },
 }));

@@ -1,5 +1,4 @@
 import * as Sentry from "@sentry/react-router";
-
 import {
   isRouteErrorResponse,
   Links,
@@ -8,7 +7,6 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
 import type { Route } from "./+types/root";
 import "./app.css";
 
