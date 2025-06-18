@@ -5,6 +5,9 @@ export default {
   // Config options...
   // Server-side render by default, to enable SPA mode set this to `false`
   ssr: true,
+  future: {
+    unstable_optimizeDeps: false,
+  },
   buildEnd: async ({ viteConfig, reactRouterConfig, buildManifest }) => {
     // ...
     // Call this at the end of the hook
