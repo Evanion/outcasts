@@ -1,7 +1,7 @@
 import { CodeChallengeMethod, OAuth2Strategy } from "remix-auth-oauth2";
 import { User } from "../entities/user";
 import { plainToInstance } from "class-transformer";
-import { UserInfo } from "../entities/userinfo";
+import { UserInfoDto } from "../dtos/userinfo";
 
 export const battleNetStrategy = await OAuth2Strategy.discover<User>(
   "https://oauth.battle.net",
@@ -19,11 +19,13 @@ export const battleNetStrategy = await OAuth2Strategy.discover<User>(
       tokens,
       ...rest,
     });
+    
     const userInfo = await fetch("https://oauth.battle.net/userinfo", {
       headers: {
         Authorization: `Bearer ${tokens.accessToken()}`,
       },
-    }).then<UserInfo>((res) => plainToInstance(UserInfo, res.json()));
+    }).then<UserInfoDto>((res) => plainToInstance(UserInfoDto, res.json()));
+    
     console.log("User info response", userInfo);
 
     return plainToInstance(User, {

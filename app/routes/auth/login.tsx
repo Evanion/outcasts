@@ -1,12 +1,10 @@
 import { Form, redirect } from "react-router";
 
-import { sessionStorage } from "~/modules/auth/auth.cookie.server";
-import { authenticator } from "~/modules/auth/auth.server";
 import type { Route } from "./+types/login";
 import { isEnum } from "class-validator";
-import { instanceToPlain } from "class-transformer";
 import { SocialButton } from "~/modules/auth/components/social-button";
 import { Provider } from "~/modules/auth/enums/provider.enum";
+import { authenticator } from "~/modules/auth/server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await authenticator.authenticate("bnet", request);

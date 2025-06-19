@@ -1,10 +1,8 @@
 import { redirect } from "react-router";
-import { authenticator } from "~/modules/auth/auth.server";
-import { Provider } from "~/modules/auth/enums/provider.enum";
 import type { Route } from "./+types/logout";
-import { sessionStorage } from "~/modules/auth/auth.cookie.server";
 import type { OAuth2Strategy } from "remix-auth-oauth2";
-import type { User } from "~/modules/auth/entities/user";
+import { authenticator, Provider, User } from "~/modules/auth/server";
+
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(
@@ -22,7 +20,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     });
   }
 
-  await bnet.revokeToken(user.accessToken);
+  if (user.accessToken) {
+    await bnet.revokeToken(user.accessToken);
+  }
   session.unset("user");
   return redirect("/", {
     headers: {

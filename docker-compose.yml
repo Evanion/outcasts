@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: outcastsUsr
+      POSTGRES_PASSWORD: outcastsPw
+      POSTGRES_DB: outcasts
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.docker/pg:/var/lib/postgresql/data
