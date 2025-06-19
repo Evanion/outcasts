@@ -1,17 +1,24 @@
-
-import { plainToInstance } from "class-transformer";
-import  { Persona } from "./entities/persona";
+import { Service } from "typedi";
 import { v5 as uuidv5 } from "uuid";
+import { Repository, DataSource } from "typeorm";
+import { Persona } from "./entities/persona.entity";
+import { IPersonaService, PERSONA_SERVICE } from "./interfaces/persona-service.interface";
 
-export class PersonaService {
-  
-  /**
-   * Get a persona by identifier, if it doesn't exist, create it
-   * @param identifier - The identifier of the persona
-   * @returns The persona
-   */
-  async get(identifier: string): Promise<Persona> {
+@Service(PERSONA_SERVICE)
+export class PersonaService implements IPersonaService {
+  private repo: Repository<Persona>;
+
+  constructor(private dataSource: DataSource) {
+    this.repo = this.dataSource.getRepository(Persona);
+  }
+
+  async getOrCreatePersonaByIdentifier(identifier: string): Promise<Persona> {
     const id = uuidv5(identifier, process.env.PERSONA_NS!);
-    return plainToInstance(Persona, { id });
+    let persona = await this.repo.findOneBy({ id });
+    if (!persona) {
+      persona = this.repo.create({ id });
+      await this.repo.save(persona);
+    }
+    return persona;
   }
 }
