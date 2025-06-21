@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { PassThrough } from "node:stream";
 import {
   getMetaTagTransformer,
@@ -14,29 +15,8 @@ import type { RenderToPipeableStreamOptions } from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
 import { I18nextProvider } from "react-i18next";
 import { getInstance } from "~/modules/i18n";
-import "reflect-metadata";
-import { Container } from "typedi";
-import { initializeDatabase, closeDatabase } from "~/modules/db/db.server";
-import { useContainer } from "typeorm";
 
 export const streamTimeout = 5_000;
-
-// Initialize TypeORM with TypeDI container
-useContainer(Container);
-
-// Initialize database when server starts
-initializeDatabase().catch(console.error);
-
-// Cleanup on server shutdown
-process.on('SIGINT', async () => {
-  await closeDatabase();
-  process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-  await closeDatabase();
-  process.exit(0);
-});
 
 function handleRequest(
   request: Request,

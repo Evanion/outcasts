@@ -15,8 +15,9 @@ import * as locales from "./locales";
 import { localeCookie } from "./modules/i18n/i18n.cookie.server";
 import { useTranslation } from "react-i18next";
 import { useChangeLanguage } from "remix-i18next/react";
+import { authMiddleware } from "./modules/auth";
 
-export const unstable_middleware = [i18nMiddleware];
+export const unstable_middleware = [authMiddleware, i18nMiddleware];
 
 export const handle = {
   i18n: ["common"],

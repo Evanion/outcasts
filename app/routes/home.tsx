@@ -1,21 +1,16 @@
 import type { Route } from "./+types/home";
-import { sessionStorage } from "~/modules/auth/auth.cookie.server";
 import { Button } from "~/components/ui/button";
 import { Form, Link } from "react-router";
 import { SocialButton } from "~/modules/auth/components/social-button";
 import { Provider } from "~/modules/auth/enums/provider.enum";
-import { getInstance } from "~/modules/i18n/i18n.middleware";
 import { useTranslation } from "react-i18next";
+import { getAuthContext } from "~/modules/auth";
 
-export const loader = async ({ request }: Route.LoaderArgs) => {
-  const session = await sessionStorage.getSession(
-    request.headers.get("Cookie")
-  );
-
-  const user = session.get("user");
+export const loader = async ({ context }: Route.LoaderArgs) => {
+  const auth = getAuthContext(context);
 
   return {
-    user,
+    auth,
   };
 };
 
@@ -26,13 +21,18 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home({ loaderData: { user } }: Route.ComponentProps) {
+export default function Home({ loaderData: { auth } }: Route.ComponentProps) {
   const { t } = useTranslation("auth");
-  if (!user)
+  console.log("auth", auth);
+  if (!auth.isAuthenticated)
     return (
       <div className="flex h-screen items-center justify-center">
         <Form method="post" action="/login">
-          <SocialButton provider={Provider.BNet} type="submit" />
+          <SocialButton
+            provider={Provider.BNet}
+            name="provider"
+            type="submit"
+          />
         </Form>
       </div>
     );
@@ -40,7 +40,7 @@ export default function Home({ loaderData: { user } }: Route.ComponentProps) {
   return (
     <div className="flex h-screen items-center justify-center">
       <h1>
-        {t("GREETING_USER", { username: user.battletag, ns: "auth" })}
+        {t("GREETING_USER", { username: auth.sub, ns: "auth" })}
         <Button asChild>
           <Link to="/logout">{t("LOGOUT", { ns: "auth" })}</Link>
         </Button>

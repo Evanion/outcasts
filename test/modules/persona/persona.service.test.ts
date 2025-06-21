@@ -60,7 +60,7 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      const persona = await personaService.getOrCreatePersonaByIdentifier(identifier);
+      const persona = await personaService.get(identifier);
 
       expect(persona).toBeDefined();
       expect(persona.id).toBe(expectedId);
@@ -92,7 +92,7 @@ describe('PersonaService', () => {
       
       mockRepository.findOneBy.mockResolvedValue(existingPersona);
 
-      const persona = await personaService.getOrCreatePersonaByIdentifier(identifier);
+      const persona = await personaService.get(identifier);
 
       expect(persona).toBeDefined();
       expect(persona.id).toBe(expectedId);
@@ -120,8 +120,8 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      const persona1 = await personaService.getOrCreatePersonaByIdentifier(identifier);
-      const persona2 = await personaService.getOrCreatePersonaByIdentifier(identifier);
+      const persona1 = await personaService.get(identifier);
+      const persona2 = await personaService.get(identifier);
 
       expect(persona1.id).toBe(expectedId);
       expect(persona2.id).toBe(expectedId);
@@ -146,8 +146,8 @@ describe('PersonaService', () => {
       mockRepository.create.mockImplementation((data: any) => plainToInstance(Persona, data));
       mockRepository.save.mockImplementation((persona: any) => Promise.resolve(persona));
 
-      const persona1 = await personaService.getOrCreatePersonaByIdentifier(identifier1);
-      const persona2 = await personaService.getOrCreatePersonaByIdentifier(identifier2);
+      const persona1 = await personaService.get(identifier1);
+      const persona2 = await personaService.get(identifier2);
 
       expect(persona1.id).not.toBe(persona2.id);
       expect(persona1.id).toBe(expectedId1);
@@ -166,7 +166,7 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      const persona = await personaService.getOrCreatePersonaByIdentifier(battleNetSub);
+      const persona = await personaService.get(battleNetSub);
 
       expect(persona.id).toBe(expectedId);
       expect(mockUuidv5).toHaveBeenCalledWith(battleNetSub, process.env.PERSONA_NS);
@@ -184,7 +184,7 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      const persona = await personaService.getOrCreatePersonaByIdentifier(emptyIdentifier);
+      const persona = await personaService.get(emptyIdentifier);
 
       expect(persona.id).toBe(expectedId);
       expect(mockUuidv5).toHaveBeenCalledWith(emptyIdentifier, process.env.PERSONA_NS);
@@ -202,7 +202,7 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      const persona = await personaService.getOrCreatePersonaByIdentifier(specialIdentifier);
+      const persona = await personaService.get(specialIdentifier);
 
       expect(persona.id).toBe(expectedId);
       expect(mockUuidv5).toHaveBeenCalledWith(specialIdentifier, process.env.PERSONA_NS);
@@ -222,7 +222,7 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      const persona = await personaService.getOrCreatePersonaByIdentifier(identifier);
+      const persona = await personaService.get(identifier);
 
       expect(persona.id).toBe(expectedId);
       expect(mockUuidv5).toHaveBeenCalledWith(identifier, process.env.PERSONA_NS);
@@ -243,12 +243,12 @@ describe('PersonaService', () => {
       mockRepository.create.mockReturnValue(mockPersona);
       mockRepository.save.mockResolvedValue(mockPersona);
 
-      await personaService.getOrCreatePersonaByIdentifier(identifier);
+      await personaService.get(identifier);
 
       // Second call: persona exists
       mockRepository.findOneBy.mockResolvedValueOnce(mockPersona);
 
-      await personaService.getOrCreatePersonaByIdentifier(identifier);
+      await personaService.get(identifier);
 
       // Verify create was only called once
       expect(mockRepository.create).toHaveBeenCalledTimes(1);
@@ -276,7 +276,7 @@ describe('PersonaService', () => {
 
       // Make multiple concurrent calls
       const promises = Array.from({ length: 5 }, () => 
-        personaService.getOrCreatePersonaByIdentifier(identifier)
+        personaService.get(identifier)
       );
 
       const results = await Promise.all(promises);
@@ -305,7 +305,7 @@ describe('PersonaService', () => {
       mockRepository.findOneBy.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(
-        personaService.getOrCreatePersonaByIdentifier(identifier)
+        personaService.get(identifier)
       ).rejects.toThrow('Database connection failed');
     });
 
@@ -322,7 +322,7 @@ describe('PersonaService', () => {
       mockRepository.save.mockRejectedValue(new Error('Save failed'));
 
       await expect(
-        personaService.getOrCreatePersonaByIdentifier(identifier)
+        personaService.get(identifier)
       ).rejects.toThrow('Save failed');
     });
   });

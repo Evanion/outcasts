@@ -1,0 +1,4 @@
+export enum AreaStatus {
+  CONSTRUCTION = "CONSTRUCTION",
+  AVAILABLE = "AVAILABLE",
+}

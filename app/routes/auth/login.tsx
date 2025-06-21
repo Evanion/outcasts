@@ -1,13 +1,15 @@
+import { Container } from "typedi";
+import { AUTH_SERVICE, getAuthContext } from "~/modules/auth";
 import { Form, redirect } from "react-router";
-
 import type { Route } from "./+types/login";
-import { isEnum } from "class-validator";
 import { SocialButton } from "~/modules/auth/components/social-button";
 import { Provider } from "~/modules/auth/enums/provider.enum";
-import { authenticator } from "~/modules/auth/server";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  await authenticator.authenticate("bnet", request);
+export async function loader({ context }: Route.LoaderArgs) {
+  const auth = getAuthContext(context);
+  if (auth.isAuthenticated) {
+    return redirect("/");
+  }
 }
 
 export default function LoginPage() {
@@ -19,23 +21,7 @@ export default function LoginPage() {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const session = await sessionStorage.getSession(
-    request.headers.get("Cookie")
-  );
-  const formData = await request.clone().formData();
-  const provider = formData.get("provider") as Provider | null;
-  if (!provider) return new Response("Provider not specified", { status: 400 });
+  const authService = Container.get(AUTH_SERVICE);
 
-  if (!isEnum(provider, Provider))
-    return new Response("Invalid provider", { status: 400 });
-  const user = await authenticator.authenticate(provider, request);
-  if (!user) return new Response("Authentication failed", { status: 401 });
-  session.set("user", user);
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await sessionStorage.commitSession(session, {
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-      }),
-    },
-  });
+  return authService.login(request);
 }
