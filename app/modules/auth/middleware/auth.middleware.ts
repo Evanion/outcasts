@@ -5,17 +5,20 @@ import {
 } from "react-router";
 import { Container } from "typedi";
 import { AUTH_SERVICE } from "../constants";
+import { Persona, PERSONA_SERVICE } from "~/modules/persona";
 
 interface BaseAuthContext {
   isAuthenticated: boolean;
   token?: string;
   sub?: number;
+  persona?: Persona;
 }
 
 interface LoggedInContext extends BaseAuthContext {
   isAuthenticated: true;
   token: string;
   sub: number;
+  persona: Persona;
 }
 
 interface LoggedOutContext extends BaseAuthContext {
@@ -32,6 +35,7 @@ export const authMiddleware: Route.unstable_MiddlewareFunction = async (
 ) => {
   try {
     const authService = Container.get(AUTH_SERVICE);
+    const personaService = Container.get(PERSONA_SERVICE);
     const auth = await authService.getAuth(request);
 
     if (!auth || !auth.accessToken) {
@@ -42,10 +46,12 @@ export const authMiddleware: Route.unstable_MiddlewareFunction = async (
       return;
     }
 
+    const persona = await personaService.get(auth.sub.toString());
     const authCtx: LoggedInContext = {
       isAuthenticated: true,
       token: auth.accessToken,
       sub: auth.sub,
+      persona,
     };
 
     context.set(authContext, authCtx);
